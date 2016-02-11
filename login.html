@@ -1,33 +1,64 @@
 <div class="col-md-4 col-md-offset-4">
-    <script>
-        var info;
-        $("#exampleInputEmail1").click(function(){
-            $.post("//121.42.141.42/dps/api/get/token/index.php",{},
-            function(data,status){
-                info = eval("(" + data + ")");
-                $("#load-button").removeAttr("disabled");
-            });
-        });
-    </script>
+	<script>
+		var info;
+		var token_status = false;
+		$("#username-field").click(function(){
+			if (token_status == false)
+			{
+				$("#load-button").html("请求凭据……");
+				$.post("//121.42.141.42/dps/api/get/token",{},
+				function(data,status){
+					info = eval("(" + data + ")");
+					$("#storage").html(info["token"]);
+					global_token = info["token"];
+					$("#load-button").removeAttr("disabled");
+					$("#load-button").html("登陆");
+					token_status = true;
+				});
+			}
+		});
+		$(document).ready(function(){
+			$("#status").html("用户登录");
+			$(".banner-detail").addClass("hidden");
+			$("#load-button").click(function(){
+				$.post("//121.42.141.42/dps/api/users/login",
+					{
+						username: $("#username-field").val(),
+						password: $("#password-field").val(),
+						token: global_token
+					},
+					function(data,status){
+						alert("Data: " + data + "\nStatus: " + status);
+					});
+			});
+			
+			$("#password-field").keypress(function(event){
+				if(event["charCode"] == 13)
+				{
+					$("#load-button").click();
+				}
+			});
+		});
+		
+		$(document).ajaxError(function(){
+			$("#alert-hint").removeClass("hidden");
+		});
+	</script>
 <div class="panel panel-primary">
-    <div class="panel-heading">用户登录</div>
-    <div class="panel-body">
+	<div class="panel-heading">用户登录</div>
+	<div class="panel-body">
+	<div class="alert alert-warning hidden" role="alert" id="alert-hint">.err</div>
 <form>
-  <div class="form-group">
-    <label for="exampleInputEmail1">电子邮箱</label>
-    <input type="email" class="form-control" id="exampleInputEmail1" placeholder="Email">
-  </div>
-  <div class="form-group">
-    <label for="exampleInputPassword1">密码</label>
-    <input type="password" class="form-control" id="exampleInputPassword1" placeholder="Password">
-  </div>
-  <div class="checkbox">
-    <label>
-      <input type="checkbox"> 记住我
-    </label>
-  </div>
-  <button type="submit" class="btn btn-default" disabled="disabled" id="load-button">登陆</button>
+	<div class="form-group">
+	<label for="exampleInputEmail1">电子邮箱</label>
+	<input type="email" class="form-control" id="username-field" placeholder="Email">
+	</div>
+	<div class="form-group">
+	<label for="exampleInputPassword1">密码</label>
+	<input type="password" class="form-control" id="password-field" placeholder="Password">
+	</div>
+	<button type="button" class="btn btn-default" disabled="disabled" id="load-button">登陆</button>
 </form>
-    </div>
-    </div>
+	</div>
+	</div>
 </div>
